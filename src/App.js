@@ -6,33 +6,44 @@ import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
-import MyInput from "./components/UI/input/MyInput";
+import Loader from "./components/UI/loader/Loader";
 import MyModal from "./components/UI/myModal/MyModal";
-import MySelect from "./components/UI/select/MySelect";
+import Pagination from "./components/UI/pagination/Pagination";
+import { useFetching } from "./hooks/useFetching";
+import { getPageCount, getPagesArray } from "./utils/pages";
 
 function App() {
-    const [posts, setPosts] = useState([
-        { id: 1, title: "111", content: "aaa" },
-        { id: 2, title: "222", content: "bbb" },
-        { id: 3, title: "333", content: "ccc" },
-    ]);
+    const [posts, setPosts] = useState([]);
     const [sortSelected, setSortSelected] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [modal, setModal] = useState(false);
+    const [totalPages, setTotalPages] = useState(0);
+    const [limit, setLimit] = useState(10);
+    const [page, setPage] = useState(1);
+
+    let pagesArray = getPagesArray(totalPages);
+
+    const [fetchPost, isPostsLoading, postError] = useFetching(async () => {
+        const response = await PostService.getAll(limit, page);
+        setPosts(response.data);
+        const totalCount = response.headers["x-total-count"];
+        setTotalPages(getPageCount(totalCount, limit));
+    });
 
     const createPost = (newPost) => setPosts([...posts, newPost], setModal(!modal));
     const deletePost = (post) => setPosts(posts.filter((p) => p.id !== post.id));
     const sortPost = (sort) => setSortSelected(sort);
+    const changePage = (page) => setPage(page);
 
     /////////////////////// вынести в отдельный хук (ниже) /////////////////////
 
     const sortedPost = useMemo(() => {
-        console.log("sorted");
         if (sortSelected) {
             return [...posts].sort((a, b) => a[sortSelected].localeCompare(b[sortSelected]));
         }
         return posts;
     }, [sortSelected, posts]);
+    console.log(sortSelected);
 
     const sortedAndSearchedPists = useMemo(() => {
         return sortedPost.filter((post) => {
@@ -42,14 +53,9 @@ function App() {
 
     /////////////////////// вынести в отдельный хук (выше) /////////////////////
 
-    async function fetchPost() {
-        const response = await PostService.getAll();
-        setPosts(response);
-    }
-
     useEffect(() => {
         fetchPost();
-    }, []);
+    }, [page]);
 
     return (
         <div className="App">
@@ -66,7 +72,13 @@ function App() {
                 sortPost={sortPost}
                 setSearchQuery={setSearchQuery}
             />
-            <PostList onDelete={deletePost} posts={sortedAndSearchedPists} title="Posts list" />
+            {postError && <h1> Error "{postError}"</h1>}
+            {isPostsLoading ? (
+                <Loader />
+            ) : (
+                <PostList onDelete={deletePost} posts={sortedAndSearchedPists} title="Posts list" />
+            )}
+            <Pagination pagesArray={pagesArray} changePage={changePage} page={page} />
         </div>
     );
 }

@@ -16,7 +16,7 @@ function PostFilter(props) {
                 defaultValue="Sort By"
                 options={[
                     { value: "title", name: "By title" },
-                    { value: "content", name: "By content" },
+                    { value: "body", name: "By content" },
                 ]}
             />
         </div>

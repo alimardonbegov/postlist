@@ -6,7 +6,7 @@ function PostItem(props) {
         <div className="post">
             <div className="post-content">
                 <strong>
-                    {props.number}. {props.title}
+                    {props.post.id}. {props.title}
                 </strong>
                 <div> {props.content}</div>
             </div>
