@@ -41,7 +41,6 @@ function Posts() {
         }
         return posts;
     }, [sortSelected, posts]);
-    console.log(sortSelected);
 
     const sortedAndSearchedPists = useMemo(() => {
         return sortedPost.filter((post) => {

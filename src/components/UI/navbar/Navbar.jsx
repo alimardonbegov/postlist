@@ -10,9 +10,12 @@ function Navbar() {
             <Link className="navLink" to="/posts">
                 Posts
             </Link>
+
             <div className="dot"></div>
         </div>
     );
 }
 
 export default Navbar;
+
+// в ссылке : означает название параметра
